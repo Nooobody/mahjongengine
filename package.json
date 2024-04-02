@@ -1,0 +1,12 @@
+{
+  "name": "riichi-mahjong",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A riichi mahjong game engine with EMA-ruleset.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Maevie",
+  "license": "ISC"
+}
