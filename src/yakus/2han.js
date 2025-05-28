@@ -23,9 +23,22 @@ const {
 export default [
   { yaku: CHIITOITSU, han: 2, closedOnly: true, resolver(ctx) { return ctx.pairs.length === 7 } },
 
-  { yaku: SANSHOKUDOKOU, han: 2, hanClosed: 3, closedOnly: false, resolver({ pons, kans }) { 
-    const numbers = pons.concat(kans).map(v => v.numbers)
-    return numbers.filter((v, i, a) => a.indexOf(v) !== i && a.lastIndexOf(v) !== i).length === 3
+  { yaku: SANSHOKUDOKOU, han: 2, hanClosed: 3, closedOnly: false, resolver({ pons, kans, hand }) { 
+    const numbers = pons.concat(kans)
+    const setWithIdent = numbers.find((v, i, a) => 
+      a.some((av, ai) => 
+        i !== ai && 
+        v.set !== av.set &&
+        v.numbers[0] === av.numbers[0]
+      )
+    )
+    return howManySets(hand) === 3 && 
+      numbers.length >= 3 &&
+      !!setWithIdent &&
+      ['s', 'p', 'm'].every(set => numbers.some(ponkan => 
+        ponkan.set === set && 
+        ponkan.numbers[0] === setWithIdent.numbers[0]
+      ))
   }}, 
 
   { yaku: SANANKOU, han: 2, closedOnly: false, resolver({ pons, kans }) { return pons.concat(kans).filter(v => v.closed).length === 3 }},

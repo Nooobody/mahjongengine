@@ -18,8 +18,13 @@ export function getWaits(subHand, possibleTiles) {
 
   let tileWaits = []
   possibleTiles.forEach(v => {
-    const testHand = buildContext(sortHand(subHand.concat(v), 'ASC'))
-    if (isHandFinished(testHand)) {
+    const ascendingHand = buildContext(sortHand(subHand.concat(v), 'ASC'))
+    const descendingHand = buildContext(sortHand(subHand.concat(v), 'DESC'))
+    const mixedHand = buildContext(sortHand(subHand.concat(v), 'MIXED'))
+
+    if (isHandFinished(ascendingHand) || 
+        isHandFinished(descendingHand) ||
+        isHandFinished(mixedHand)) {
       tileWaits.push(v)
     }
   })

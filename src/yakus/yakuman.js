@@ -47,8 +47,9 @@ export default [
     // TODO: Kans not allowed
   }},
 
-  { yaku: SUUANKOU, closedOnly: true, resolver({ pons, kans }) {
-    return pons.length + kans.length === 4
+  { yaku: SUUANKOU, closedOnly: false, resolver({ pons, kans }) {
+    const numbers = pons.concat(kans)
+    return numbers.filter(v => v.closed).length === 4
     // TODO: Ron on discard allowed only on pair
   }},
 
@@ -70,15 +71,17 @@ export default [
   }},
 
   { yaku: DAISANGEN, closedOnly: false, resolver({ pons, kans }) {
-    return ['f', 'c', 'b'].every(v => pons.includes(v) || kans.includes(v))
+    const numbers = pons.concat(kans)
+    return ['f', 'c', 'b'].every(v => numbers.some(n => n.numbers[0] === v))
   }},
 
   { yaku: SHOUSUUSHII, closedOnly: false, resolver({ pons, kans, pairs }) {
-    return isWind(pairs[0][0]) &&
-      pons.concat(kans).reduce((acc, cur) => isWind(cur) ? acc + 1 : acc, 0) === 3
+    return pairs[0].set === 'w' &&
+       pons.concat(kans).reduce((acc, cur) => isWind(cur.tiles[0]) ? acc + 1 : acc, 0) === 3
   }}, 
 
   { yaku: DAISUUSHII, closedOnly: false, resolver({ pons, kans }) {
-    return ['e', 's', 'w', 'n'].every(v => pons.includes(v) || kans.includes(v))
+    const numbers = pons.concat(kans)
+    return ['e', 's', 'w', 'n'].every(v => numbers.some(n => n.numbers[0] === v))
   }}
 ]

@@ -2,7 +2,6 @@
 import { 
   isTerminal,
   isHonor,
-  isThirteenOrphans,
   isPinfuHand,
   isOpenHand,
   hasValuePair
@@ -14,11 +13,11 @@ import threeFiveYakus from './yakus/35han.js'
 import yakumans from './yakus/yakuman.js'
 import yakuEnum from './yakus/enum.js'
 
-const MANGAN = 2000
-const HANEMAN = 3000
-const BAIMAN = 4000
-const SANBAIMAN = 6000
-const YAKUMAN = 8000
+export const MANGAN = 2000
+export const HANEMAN = 3000
+export const BAIMAN = 4000
+export const SANBAIMAN = 6000
+export const YAKUMAN = 8000
 
 const isSevenPairs = (ctx) => ctx.pairs.length === 7
 
@@ -33,15 +32,19 @@ function scoreMinipoints(ctx) {
     return 25
   }
 
-  // on closed ron, it's 30
   const base = 20
 
   let points = base
 
-  ctx.waitFu = getWait(ctx)
+  if (ctx.isClosedHand && ctx.gamestate.newestTileType === "discard") {
+    // Closed ron
+    points += 10
+  }
+
+  ctx.waitFu = getWaitFu(ctx)
   points += ctx.waitFu
 
-  if (isPinfuHand(ctx) && isOpenHand(ctx) && waitFu === 0) {
+  if (isPinfuHand(ctx) && isOpenHand(ctx) && ctx.waitFu === 0) {
     points += 2 // Open pinfu
   }
 
@@ -77,12 +80,15 @@ function calculateBasePoints({ han, fu, isEast }) {
   return fu * Math.pow(2, 2 + han + eastBonus)
 }
 
-function getWait(ctx) {
-  const { newestTile, hand } = ctx
+export function getWaitFu(ctx) {
+  const { hand } = ctx
+  const { newestTile } = ctx.gamestate
   const tileInd = hand.findIndex(v => v === newestTile)
   const subHand = hand.filter((v, i) => i !== tileInd)
 
   const waits = getWaits(subHand)
+  console.log(ctx)
+  console.log(waits)
   if (waits.length === 1) {
     return 2
   }
@@ -97,6 +103,69 @@ function getWait(ctx) {
 
 function roundPoints(points) {
   return Math.ceil(points / 100) * 100
+}
+
+export function getBasePoints(han, fu) {
+  let points, eastPoints
+  if (han < 5) {
+    points = calculateBasePoints({ han, fu, isEast: false })
+    eastPoints = calculateBasePoints({ han, fu, isEast: true })
+    if (points > MANGAN) {
+      points = MANGAN
+      eastPoints = points * 2
+    }
+  }
+  else {
+    switch(han) {
+      case 5:
+        points = MANGAN
+        break
+      case 6:
+      case 7:
+        points = HANEMAN
+        break
+      case 8:
+      case 9:
+      case 10:
+        points = BAIMAN
+        break
+      default:
+        points = SANBAIMAN
+    }
+    eastPoints = points * 2
+  }
+
+  return { points, eastPoints }
+}
+
+export function getSeatPoints({ points, eastPoints, seatWind, newestTileType }) {
+  if (newestTileType === 'discard') {
+    if (seatWind === 'e') {
+      return {
+        points: roundPoints(eastPoints * 3),
+        eastPoints: null
+      }
+    }
+    else {
+      return {
+        points: roundPoints(points * 4),
+        eastPoints: null
+      }
+    }
+  }
+
+  if (seatWind === 'e') {
+    return {
+      points: roundPoints(eastPoints),
+      eastPoints: null
+    }
+  } 
+
+  return {
+    points: roundPoints(points),
+    eastPoints: roundPoints(eastPoints),
+  }
+
 }
 
 function scoreHand(ctx) {
@@ -132,35 +201,7 @@ function scoreHand(ctx) {
   const dora = ctx.gamestate.dora
   ctx.hand.forEach(v => dora.includes(v) ? han += 1 : null)
 
-  let points, eastPoints
-  if (han < 5) {
-    points = calculateBasePoints({ han, fu, isEast: false })
-    eastPoints = calculateBasePoints({ han, fu, isEast: true })
-    if (points > MANGAN) {
-      points = MANGAN
-      eastPoints = points * 2
-    }
-  }
-  else {
-    switch(han) {
-      case 5:
-        points = MANGAN
-        break
-      case 6:
-      case 7:
-        points = HANEMAN
-        break
-      case 8:
-      case 9:
-      case 10:
-        points = BAIMAN
-        break
-      default:
-        points = SANBAIMAN
-    }
-    eastPoints = points * 2
-  }
-
+  const { points, eastPoints } = getBasePoints(han, fu)
   const res = {
     fu,
     han,
@@ -169,32 +210,11 @@ function scoreHand(ctx) {
 
   const { gamestate } = ctx
   const { seatWind, newestTileType } = gamestate
-  if (newestTileType === 'discard') {
-    if (seatWind === 'e') {
-      return {
-        ...res,
-        points: roundPoints(eastPoints * 3)
-      }
-    }
-    else {
-      return {
-        ...res,
-        points: roundPoints(points * 4)
-      }
-    }
-  }
-
-  if (seatWind === 'e') {
-    return {
-      ...res,
-      points: roundPoints(eastPoints)
-    }
-  } 
+  const seatPoints = getSeatPoints({ points, eastPoints, seatWind, newestTileType })
 
   return {
     ...res,
-    points: roundPoints(points),
-    eastPoints: roundPoints(eastPoints),
+    ...seatPoints
   }
 }
 

@@ -8,9 +8,9 @@ import { buildContext } from './src/handstructure.js'
 import { calculateWaits } from './src/waits.js'
 import scoreHand from './src/scoring.js'
 
-function checkHand(hand, newestTile, gamestate) {
+function checkHand(hand, gamestate) {
 
-  const context = buildContext(sortHand(hand, 'ASC'), newestTile, gamestate)
+  const context = buildContext(sortHand(hand, 'ASC'), gamestate)
 
   console.log("Hand:", hand)
   console.log(context)
@@ -38,15 +38,16 @@ function checkHand(hand, newestTile, gamestate) {
 const state = {
   roundWind: 'e',
   seatWind: 'n',
+  newestTile: '6p',
   newestTileType: 'draw',
-  newestTileSource: 'dead wall',
+  newestTileSource: 'wall',
   riichi: true,
   ippatsuChance: true,
   wallTiles: 30,
   dora: ['9s']
 }
 
-checkHand(["9s", "9s", "9s", "1s", "2s", "3s", "4s", "5s", "6s", "3m", "3m", "7p", "6p", "5p"], '6p', state)
+checkHand(["9s", "9s", "8s", "1s", "2s", "3s", "4s", "5s", "6s", "3m", "3m", "7p", "6p", "5p"], state)
 // checkHand(['2s','2s', 'n', 'n', '4s', '4s', '6m', '6m', '9p', '9p', '1s', '1s', '2m', '2m'], '2s', state)
 // checkHand(['1p','2p', '3p', '4p', '5p', '6p', '7p', '8p', '9p', '2p', '8p', '2p', '7p', '6m'])
 // checkHand(['8m', '8m','2s', '3s', '4s', '5s', '6s', '4p', '2p', '3p', '4p', '2p', '3p', '4s'], '3s', state)

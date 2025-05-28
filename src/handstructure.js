@@ -4,14 +4,14 @@ import { getTile } from './utils.js'
 function getSet(tiles) {
   const { set } = getTile(tiles[0])
   return {
-    tiles: tiles,
+    tiles,
     set,
     numbers: tiles.map(getTile).map(v => v.number).sort().join(''),
     closed: true
   }
 }
 
-function getDuplicates(tile, hand) {
+export function getDuplicates(tile, hand) {
   let dups = []
 
   hand.forEach(v => {
@@ -86,12 +86,12 @@ function filterHand(...sets) {
   }
 }
 
-function checkPairs(tile, tileIndex, hand) {
+export function checkPairs(tile, tileIndex, hand) {
   const dups = getDuplicates(tile, hand)
   return dups.length === 2 ? getSet(dups) : null
 }
 
-export function buildContext(hand, newestTile, gamestate) {
+export function buildContext(hand, gamestate) {
   let chis = []
   let kans = []
   let pons = []
@@ -101,7 +101,7 @@ export function buildContext(hand, newestTile, gamestate) {
     [ checkChis, chis ],
     [ checkKans, kans ],
     [ checkPons, pons ],
-    [ checkPairs, pairs ]
+    [ checkPairs, pairs ],
   ]
 
   const getCheckedTiles = () => {
@@ -151,7 +151,6 @@ export function buildContext(hand, newestTile, gamestate) {
     pons,
     pairs,
     possibleKans,
-    newestTile,
     gamestate,
     isClosedHand,
     sets: chis.length + pons.length,

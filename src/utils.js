@@ -131,7 +131,41 @@ function sortHandFn(a, b) {
 }
 
 export function sortHand(hand, dir) {
-  return dir === 'ASC'
-    ? hand.slice().sort((a, b) => sortHandFn(a, b))
-    : hand.slice().sort((a, b) => sortHandFn(b, a))
+  switch (dir) {
+    case "ASC":
+      return hand.slice().sort((a, b) => sortHandFn(a, b))
+    case "DESC":
+      return hand.slice().sort((a, b) => sortHandFn(b, a))
+    case "MIXED":
+      const honors = hand.filter(isHonor)
+      const numbers = hand.filter(v => !isHonor(v)).reduce((acc, cur) => {
+        const tile = getTile(cur)
+        if (!acc[tile.set]) {
+          acc[tile.set] = []
+        }
+        acc[tile.set] = acc[tile.set].concat(tile.number)
+
+        return acc
+      }, {})
+      const sortedNumbers = Object.entries(numbers).map(([set, numbers]) => {
+        let sorted = numbers.slice()
+        sorted.sort()
+        let mixedNumbers = []
+
+        for (let i = 0; i < numbers.length; i++) {
+          if (i % 2 === 0) {
+            mixedNumbers.push(sorted.shift())
+          }
+          else {
+            mixedNumbers.push(sorted.pop())
+          }
+        }
+        
+        return mixedNumbers.map(v => v + set)
+      });
+
+      return sortedNumbers.concat(honors).flat(2)
+  }
+
+  return hand
 }
