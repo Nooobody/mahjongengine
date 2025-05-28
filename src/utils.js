@@ -50,7 +50,7 @@ export function isPinfuHand(ctx) {
 export function hasValuePair(ctx) {
   const { seatWind, roundWind } = ctx.gamestate
   const pair = ctx.pairs[0]
-  return pair.set === 'd' || pair.numbers.includes(seatWind) || pair.numbers.includes(roundWind)
+  return pair?.set === 'd' || pair?.numbers.includes(seatWind) || pair?.numbers.includes(roundWind)
 }
 
 export function hasHonorInHand(hand) {

@@ -87,8 +87,8 @@ export function getWaitFu(ctx) {
   const subHand = hand.filter((v, i) => i !== tileInd)
 
   const waits = getWaits(subHand)
-  console.log(ctx)
-  console.log(waits)
+  // console.log(ctx)
+  // console.log(waits)
   if (waits.length === 1) {
     return 2
   }
